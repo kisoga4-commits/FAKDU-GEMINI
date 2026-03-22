@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#800000">
+    <title>FAKDU v9.46 - Master Node</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-container min-h-screen">
+
+    <!--* install-banner open -->
+    <div id="pwa-install-banner" class="hidden bg-blue-600 text-white w-full px-4 py-3 flex justify-between items-center shadow-md z-[100]">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">📲</span>
+            <span class="text-xs font-bold leading-tight">ติดตั้งแอป FAKDU<br>ใช้งานออฟไลน์ได้ต่อเนื่อง</span>
+        </div>
+        <button onclick="installPWA()" class="bg-white text-blue-600 px-4 py-1.5 rounded-full font-black text-xs shadow-sm active:scale-95">ติดตั้งเลย</button>
+    </div>
+    <!--** install-banner close -->
+
+    <!--* header open -->
+    <header class="glass-header relative flex justify-between items-center w-full gap-2">
+        <div class="flex items-center gap-4 w-[52%] z-10 min-w-0">
+            <div class="relative w-[68px] h-[68px] flex-shrink-0">
+                <div id="online-status-dot" class="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full border-2 border-white bg-green-500 shadow-sm z-20" title="Online"></div>
+                <img id="shop-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMTYiIGZpbGw9IiNlNWU3ZWIiLz48dGV4dCB4PSI0MCIgeT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnNpemU9IjE4IiBmaWxsPSIjOWNhM2FmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+TE9HTzwvdGV4dD48L3N2Zz4=" class="w-full h-full object-cover rounded-[16px] border-2 border-white shadow-sm bg-white">
+            </div>
+
+            <div class="min-w-0 flex-1">
+                <h1 id="display-shop-name" class="font-black text-[28px] leading-none text-white drop-shadow-md truncate">FAKDU</h1>
+                <div class="hidden">
+                    <span id="shop-connection-text">ONLINE</span>
+                    <span id="shop-status-mini">Master พร้อมใช้งาน</span>
+                </div>
+                <div id="header-client-strip" class="flex items-center gap-1.5 min-h-[18px] mt-1">
+                    <div id="header-client-avatars" class="hidden items-center gap-1.5"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trial-badge-wrap">
+            <button id="trial-badge" onclick="openProModal()" class="bg-yellow-400 text-black px-5 py-1.5 rounded-full text-[13px] font-black cursor-pointer shadow-lg">ทดลองใช้งาน</button>
+        </div>
+
+        <div class="flex flex-col items-end justify-center w-[30%] gap-2 z-10 pr-2">
+            <div id="header-online-clients-mini" class="min-h-[18px] flex items-center gap-1"></div>
+            <div class="flex items-center gap-2">
+                <button onclick="openClientEntryModal()" class="w-12 h-12 rounded-[18px] text-gray-700 shadow-md text-xl active:scale-95" title="เข้าโหมดเครื่องลูก">📱</button>
+            </div>
+            <div class="text-right leading-tight text-[11px] font-black text-white/70 tracking-wide">FAKDU v9.46</div>
+        </div>
+    </header>
+    <!--** header close -->
+
+    <!--* nav open -->
+    <div class="top-nav !grid !grid-cols-4">
+        <div id="tab-customer" class="nav-tab active" onclick="switchTab('customer', this)"><span class="nav-icon">👨‍👩‍👦</span><span class="nav-label">ลูกค้า</span></div>
+        <div id="tab-shop" class="nav-tab" onclick="switchTab('shop', this)"><span class="nav-icon">🧾</span><span class="nav-label">เช็คบิล</span></div>
+        <div id="tab-manage" class="nav-tab" onclick="attemptAdmin('manage', this)"><span class="nav-icon">📊</span><span class="nav-label">หลังร้าน</span></div>
+        <div id="tab-system" class="nav-tab" onclick="attemptAdmin('system', this)"><span class="nav-icon">⚙️</span><span class="nav-label">ระบบ</span></div>
+    </div>
+    <!--** nav close -->
+
+    <!--* screen-customer open -->
+    <section id="screen-customer" class="screen active p-5 pt-4">
+        <div class="flex justify-between items-center mb-3">
+            <div>
+                <span class="text-[11px] font-bold text-gray-400 uppercase">จัดการโต๊ะ/คิว</span>
+                <div class="text-[10px] text-gray-400 font-bold mt-1 sr-only">กดโต๊ะเพื่อรับออร์เดอร์หรือดูรายการค้าง</div>
+            </div>
+            <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
+                <button onclick="changeGridZoom(-1)" class="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-600 rounded-lg font-black text-lg active:scale-95">-</button>
+                <div class="w-8 h-8 flex items-center justify-center font-bold text-xs text-gray-400" id="zoom-level-text">M</div>
+                <button onclick="changeGridZoom(1)" class="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-600 rounded-lg font-black text-lg active:scale-95">+</button>
+            </div>
+        </div>
+        <div id="customer-grid-toolbar" class="hidden mb-3 flex justify-end">
+            <button id="btn-toggle-grid-collapse" onclick="toggleCustomerGridCollapse()" class="text-[11px] font-black px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 active:scale-95"></button>
+        </div>
+        <div id="grid-units" class="grid grid-cols-2 gap-4"></div>
+    </section>
+    <!--** screen-customer close -->
+
+    <!--* screen-order open -->
+    <section id="screen-order" class="screen hidden bg-gray-50 p-4">
+        <div class="flex items-center gap-4 mb-4 sticky top-0 bg-gray-50/90 backdrop-blur py-2 z-10 border-b">
+            <button onclick="switchTab('customer', document.getElementById('tab-customer'))" class="bg-white px-4 py-2.5 rounded-xl shadow-sm font-black text-sm text-gray-600 border active:scale-95">← กลับ</button>
+            <div>
+                <h2 class="font-black text-xl theme-text"><span class="lbl-unit">โต๊ะ</span> <span id="active-unit-id"></span></h2>
+                <p id="active-unit-time" class="text-[11px] text-gray-400 font-bold">ยังไม่เริ่มจับเวลา</p>
+            </div>
+        </div>
+
+        <div id="ordered-items-bar" class="hidden mb-4 bg-blue-50 border border-blue-100 p-3 rounded-xl">
+            <div class="text-[10px] text-blue-600 font-bold uppercase mb-1">สั่งไปแล้ว</div>
+            <div id="ordered-items-list" class="text-xs font-bold text-gray-700 space-y-1"></div>
+        </div>
+
+        <div id="item-list" class="space-y-3 mb-28"></div>
+
+        <div class="fixed bottom-0 left-0 w-full max-w-[480px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-20 mx-auto right-0 rounded-t-[28px] p-4 pb-6 border-t border-gray-100" style="padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+            <div class="flex justify-between items-center px-2">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">ตะกร้า <span id="cart-count" class="theme-text font-black text-base">0</span></span><br>
+                    <span class="font-black text-3xl theme-text tracking-tighter">฿<span id="cart-total">0</span></span>
+                </div>
+                <button id="btn-send-order" onclick="reviewCart()" class="send-order-btn theme-bg px-8 py-3.5 rounded-2xl font-black text-base shadow-lg active:scale-95">ส่งออร์เดอร์ 🚀</button>
+            </div>
+        </div>
+    </section>
+    <!--** screen-order close -->
+
+    <!--* screen-shop open -->
+    <section id="screen-shop" class="screen hidden p-5 pt-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="font-black text-2xl text-gray-800">คิวเช็คบิล</h2>
+                <p class="text-[11px] text-gray-500 font-bold">เครื่องลูกขอเช็คได้ แต่ปิดบิลจริงที่เครื่องแม่</p>
+            </div>
+            <div id="shop-request-count" class="bg-gray-100 text-gray-600 px-3 py-2 rounded-xl text-xs font-black">0 รายการ</div>
+        </div>
+        <div id="shop-queue-toolbar" class="hidden mb-3 flex justify-end">
+            <button id="btn-toggle-queue-collapse" onclick="toggleShopQueueCollapse()" class="text-[11px] font-black px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 active:scale-95"></button>
+        </div>
+        <div id="shop-queue" class="space-y-4"></div>
+    </section>
+    <!--** screen-shop close -->
+
+    <!--* screen-manage open -->
+    <section id="screen-manage" class="screen hidden p-5">
+        <div class="flex bg-gray-100 p-2 rounded-[22px] mb-6 border shadow-inner">
+            <div class="manage-tab flex-1 text-center active rounded-[18px] py-3 text-sm font-black cursor-pointer bg-white shadow-sm text-gray-800" onclick="switchManageSub('dash', this)">📊 ยอดขาย</div>
+            <div class="manage-tab flex-1 text-center rounded-[18px] py-3 text-sm font-black cursor-pointer text-gray-500" onclick="switchManageSub('menu', this)">📦 จัดการร้าน</div>
+        </div>
+
+        <div id="sub-dash">
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-emerald-500 p-4 rounded-3xl text-white text-center shadow-lg">
+                    <div class="text-[10px] font-bold uppercase">วันนี้</div>
+                    <div class="text-xl font-black">฿<span id="stat-today">0</span></div>
+                </div>
+                <div id="card-stat-week" onclick="handleLockedFeatureClick()" class="bg-blue-500 p-4 rounded-3xl text-white text-center shadow-lg transition-all locked-feature">
+                    <div class="text-[10px] font-bold uppercase">7 วัน</div>
+                    <div class="text-xl font-black">฿<span id="stat-week">0</span></div>
+                </div>
+                <div id="card-stat-month" onclick="handleLockedFeatureClick()" class="bg-purple-500 p-4 rounded-3xl text-white text-center shadow-lg transition-all locked-feature">
+                    <div class="text-[10px] font-bold uppercase">30 วัน</div>
+                    <div class="text-xl font-black">฿<span id="stat-month">0</span></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center">
+                    <div class="text-[10px] font-bold uppercase text-slate-700">เงินรวมสะสม</div>
+                    <div class="text-lg font-black text-slate-800">💰 ฿<span id="stat-grand-total">0</span></div>
+                </div>
+                <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 text-center">
+                    <div class="text-[10px] font-bold uppercase text-emerald-700">เงินสดสะสม</div>
+                    <div class="text-lg font-black text-emerald-700">💵 ฿<span id="stat-cash-total">0</span></div>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-2xl border border-blue-100 text-center">
+                    <div class="text-[10px] font-bold uppercase text-blue-700">โอน/QR สะสม</div>
+                    <div class="text-lg font-black text-blue-700">📱 ฿<span id="stat-transfer-total">0</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-[24px] border border-gray-100 shadow-sm mb-6">
+                <div class="flex bg-gray-50 p-1 rounded-xl mb-4 border">
+                    <div class="dash-sub-tab flex-1 text-center active rounded-lg py-2 text-xs font-black cursor-pointer bg-white shadow-sm text-gray-800" onclick="switchDashTab('history', this)">📝 ประวัติการขาย</div>
+                    <div class="dash-sub-tab flex-1 text-center rounded-lg py-2 text-xs font-black cursor-pointer text-gray-500" onclick="switchDashTab('top', this)">🏆 ยอดฮิต</div>
+                </div>
+
+                <div id="dash-history">
+                    <div class="bg-blue-50 p-3 rounded-2xl border border-blue-100 mb-4" id="custom-search-area">
+                        <div class="text-[10px] text-blue-800 font-bold mb-2">ค้นหายอดเงิน (อัปเดตอัตโนมัติ)</div>
+                        <div class="flex gap-2 mb-2">
+                            <input type="date" id="search-start" class="w-full text-xs font-bold p-2 rounded-lg border outline-none text-gray-600 bg-white" onchange="calculateCustomSalesRealtime()">
+                            <input type="date" id="search-end" class="w-full text-xs font-bold p-2 rounded-lg border outline-none text-gray-600 bg-white" onchange="calculateCustomSalesRealtime()">
+                        </div>
+                        <div id="search-pro-lock-note" class="hidden text-[10px] text-amber-700 font-bold mb-2">รุ่นทดลองล็อคช่วงวันไว้เฉพาะวันนี้ • เลือกช่วงวันได้ในรุ่น Pro</div>
+                        <div class="text-center text-[10px] font-bold text-gray-500 bg-white p-2 rounded-lg border">ยอดเงินที่เลือก: <span class="font-black text-xl text-blue-700 tracking-tighter ml-1">฿<span id="search-total">0</span></span></div>
+                    </div>
+                    <div id="sales-history" class="divide-y text-xs space-y-3 max-h-60 overflow-y-auto pr-2"></div>
+                    <button onclick="clearSales()" class="w-full mt-4 bg-red-50 text-red-600 py-3 rounded-xl font-black text-xs active:scale-95 transition-transform border border-red-100">🗑️ รีเซ็ตยอดขาย</button>
+                </div>
+
+                <div id="dash-top" class="hidden">
+                    <div class="text-[11px] font-bold text-gray-500 mb-3">เมนูขายดีที่สุด จัดอันดับอัตโนมัติจากประวัติยอดขาย</div>
+                    <div id="top-items-list" class="space-y-2 mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sub-menu" class="hidden">
+            <div class="bg-gray-50 p-5 rounded-[24px] border mb-6">
+                <h3 class="font-black text-sm mb-4">🪑 ตั้งค่าจำนวนโต๊ะ/คิว</h3>
+                <div class="flex gap-3">
+                    <select id="config-unit-type" class="border-2 p-3 rounded-xl flex-1 font-bold outline-none">
+                        <option value="โต๊ะ">โต๊ะ 🍽️</option>
+                        <option value="คิว">คิว 📝</option>
+                    </select>
+                    <input id="config-unit-count" type="number" class="border-2 p-3 rounded-xl w-24 text-center font-black outline-none" value="4">
+                    <button onclick="updateUnits()" class="bg-gray-800 text-white px-5 py-3 rounded-xl font-black text-sm active:scale-95">อัปเดต</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-[24px] border shadow-sm">
+                <div class="flex justify-between items-center mb-5">
+                    <div>
+                        <h3 class="font-black text-sm">รายการเมนู (<span id="menu-count">0</span>)</h3>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">เพิ่ม แก้ไข ลบรูป ชื่อ ราคา และ add-on ได้</p>
+                    </div>
+                    <button id="btn-add-menu-item" onclick="openMenuModal()" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-black text-xs shadow-md">+ เพิ่ม</button>
+                </div>
+                <div id="admin-menu-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </section>
+    <!--** screen-manage close -->
+
+    <!--* screen-system open -->
+    <section id="screen-system" class="screen hidden p-5">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="font-black text-3xl text-gray-800">ระบบ</h2>
+                <p class="text-[11px] text-gray-500 font-bold">Sync / Recovery / Backup</p>
+            </div>
+            <button onclick="adminLogout()" class="bg-red-50 text-red-600 border border-red-100 px-5 py-2 rounded-full font-black text-[11px] active:scale-95">🔒 ล็อคแอดมิน</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-[28px] border shadow-sm mb-6">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                    <h3 class="font-black text-slate-800 text-base mb-1">☁️ ตรวจข้อมูลเครื่องลูก</h3>
+                    <p class="text-[11px] text-gray-500 font-bold">Auto sync ตอน online และกดปุ่มนี้เพื่อตรวจว่าข้อมูลตรงกันจริงไหม</p>
+                </div>
+                <div id="master-online-chip" class="px-3 py-1.5 rounded-full text-[10px] font-black bg-gray-100 text-gray-500">IDLE</div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-[24px] p-4 mb-4">
+                <div class="flex gap-3 items-center mb-3">
+                    <div id="sync-qr-area" class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border shadow-inner overflow-hidden">QR</div>
+                    <div class="flex-1">
+                        <p class="text-[10px] text-blue-500 font-bold uppercase mb-1">PIN/QR สำหรับเครื่องลูกเชื่อมต่อ</p>
+                        <div id="display-sync-key" class="text-3xl font-mono text-slate-900 font-black tracking-[6px] leading-none">PIN</div>
+                        <p class="text-[10px] text-gray-400 font-bold mt-2">หลังสแกนหรือกรอก PIN เครื่องแม่ต้องกดยอมรับก่อน</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="triggerSyncCheck(this)" id="btn-manual-sync" class="relative flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 py-3.5 rounded-2xl font-black text-xs active:scale-95 transition-all duration-300">
+                        <div class="flex items-center -space-x-1">
+                            <div id="sync-client-slot-1" class="w-7 h-7 rounded-full border-2 border-white bg-gray-100 text-[10px] text-gray-400 flex items-center justify-center overflow-hidden shadow-inner">1</div>
+                            <div id="sync-client-slot-2" class="w-7 h-7 rounded-full border-2 border-white bg-gray-100 text-[10px] text-gray-400 flex items-center justify-center overflow-hidden shadow-inner">2</div>
+                        </div>
+                        <span>เช็ค Sync</span>
+                    </button>
+                    <button id="btn-sync-new-key" onclick="requestNewSyncKey()" class="bg-slate-900 text-white py-3.5 rounded-2xl font-black text-xs active:scale-95">🔄 ขอรหัสใหม่</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="bg-gray-50 rounded-2xl p-4 border">
+                    <div class="text-[10px] text-gray-400 font-bold uppercase mb-2">สถานะตรวจล่าสุด</div>
+                    <div id="sync-check-status-text" class="font-black text-base text-gray-800">ยังไม่ได้ตรวจ</div>
+                    <div id="sync-check-status-hint" class="text-[11px] text-gray-500 font-bold mt-1">กดปุ่มเช็คเมื่อต้องการปิดร้านหรือเช็กความตรงกัน</div>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-4 border">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase">คำขอเครื่องลูก</div>
+                        <button onclick="openApprovalInbox()" class="relative px-3 py-1.5 rounded-full border border-amber-200 bg-white text-amber-700 text-[11px] font-black active:scale-95">
+                            🔔 คำขอ
+                            <span id="client-approval-badge" class="hidden absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-[10px] leading-[22px] text-center font-black">0</span>
+                        </button>
+                    </div>
+                    <div id="client-approval-count" class="font-black text-base text-gray-800">0 รายการ</div>
+                    <div class="text-[11px] text-gray-500 font-bold mt-1">ถ้าไม่เปิด popup อัตโนมัติ กด 🔔 เพื่อเข้าไปอนุมัติได้ทันที</div>
+                </div>
+            </div>
+
+            <div id="client-approval-list" class="hidden"></div>
+        </div>
+
+        <div id="pro-recovery-setup" class="bg-indigo-50 border-2 border-indigo-200 p-6 rounded-[28px] mb-6 shadow-sm">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div>
+                    <h3 class="font-black text-indigo-800 text-sm mb-1">🛡️ ข้อมูลช่วยจำสำหรับลืมรหัส</h3>
+                    <p class="text-[10px] text-indigo-500 font-bold">เลือก 7 สี + 20 สัตว์ เพื่อใช้ยืนยันสิทธิ์ก่อนรีเซ็ต PIN</p>
+                </div>
+                <button onclick="openModal('modal-recovery-setup')" class="bg-white text-indigo-700 border border-indigo-200 px-4 py-2 rounded-xl text-[11px] font-black active:scale-95">ตั้งค่า</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] font-bold text-gray-600">
+                <div class="bg-white rounded-xl p-3 border">เบอร์ช่วยจำ<br><span id="recovery-phone-state" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+                <div class="bg-white rounded-xl p-3 border">สีที่ชอบ<br><span id="recovery-color-state" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+                <div class="bg-white rounded-xl p-3 border">สัตว์ที่ชอบ<br><span id="recovery-animal-state" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-[28px] border shadow-sm mb-6">
+            <label class="text-[12px] text-gray-400 font-bold uppercase tracking-widest mb-4 block">ข้อมูลร้านค้า</label>
+            <div class="flex items-center gap-5 mb-6">
+                <div class="relative w-[90px] h-[90px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-[24px] flex items-center justify-center overflow-hidden shrink-0 cursor-pointer" onclick="document.getElementById('upload-logo').click()">
+                    <img id="system-logo-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCI+PHJlY3Qgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiByeD0iMjQiIGZpbGw9IiNmM2Y0ZjYiIHN0cm9rZT0iI2QxZDVkYiIgc3Ryb2tlLWRhc2hhcnJheT0iNCA0Ii8+PHRleHQgeD0iNDUiIHk9IjQzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOWNhM2FmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+4LmA4Lib4Lil4Li14LmI4LiiPC90ZXh0Pjx0ZXh0IHg9IjQ1IiB5PSI1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzljYTNhZiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPuC5guC4peC5guC4gTwvdGV4dD48L3N2Zz4=" class="absolute inset-0 w-full h-full object-cover">
+                    <span class="text-[10px] font-bold text-gray-400 text-center z-10 bg-white/75 px-2 py-1 rounded-lg">เปลี่ยนโลโก้</span>
+                    <input type="file" id="upload-logo" accept="image/*" class="hidden" onchange="handleImage(event, 'logo')">
+                </div>
+                <div class="flex-1 space-y-3">
+                    <input id="sys-shop-name" type="text" placeholder="ชื่อร้านค้า" class="w-full border-2 p-3.5 rounded-2xl font-bold text-base bg-gray-50 outline-none focus:border-primary">
+                    <div class="flex gap-2">
+                        <div class="flex-1 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border-2">
+                            <span class="text-[9px] text-gray-400 font-bold uppercase">ธีม</span>
+                            <input id="sys-theme" type="color" class="w-full h-8 cursor-pointer bg-transparent border-0">
+                        </div>
+                        <div class="flex-1 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border-2">
+                            <span class="text-[9px] text-gray-400 font-bold uppercase">พื้นหลัง</span>
+                            <input id="sys-bg" type="color" class="w-full h-8 cursor-pointer bg-transparent border-0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div>
+                    <label class="text-[10px] text-gray-400 font-bold mb-1 block uppercase">ธนาคาร</label>
+                    <input id="sys-bank" type="text" placeholder="กสิกรไทย" class="w-full border-2 p-3 rounded-xl text-sm font-bold bg-gray-50 outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 font-bold mb-1 block uppercase">พร้อมเพย์</label>
+                    <input id="sys-ppay" type="text" placeholder="เบอร์โทร/บัตร" class="w-full border-2 p-3 rounded-xl text-sm font-bold bg-gray-50 outline-none">
+                </div>
+            </div>
+
+            <label class="text-[10px] text-gray-400 font-bold mb-2 block uppercase">รูป QR รับเงิน (สำหรับ Offline)</label>
+            <input type="file" accept="image/*" class="w-full border-2 p-2 rounded-xl text-xs font-bold mb-6 bg-gray-50" onchange="handleImage(event, 'qr')">
+
+            <div class="border-t pt-6 mt-2">
+                <label class="text-[10px] font-bold text-red-500 mb-2 block uppercase">เปลี่ยนรหัส Admin PIN</label>
+                <input id="sys-pin" type="password" autocomplete="new-password" class="w-full border-2 p-4 rounded-xl text-xl font-black tracking-widest bg-red-50 text-red-700 outline-none border-red-200 text-center" placeholder="••••">
+            </div>
+
+            <button onclick="saveSystemSettings()" class="w-full theme-bg py-4 rounded-[22px] font-black text-lg shadow-lg mt-6 active:scale-95">💾 บันทึกการตั้งค่า</button>
+        </div>
+
+        <div class="bg-white p-5 rounded-[24px] border shadow-sm mb-6">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div>
+                    <h3 class="font-black text-sm text-slate-800">ลืมรหัส Admin</h3>
+                    <p class="text-[10px] text-slate-500 font-bold">ตั้งค่าสีที่ชอบ + สัตว์ที่ชอบ เพื่อยืนยันสิทธิ์ก่อนรีเซ็ต PIN</p>
+                </div>
+                <button id="btn-recovery-setup-secondary" onclick="openModal('modal-recovery-setup')" class="px-4 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-black active:scale-95">ตั้งค่า</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] font-bold text-gray-600">
+                <div class="bg-gray-50 rounded-xl p-3 border">เบอร์ช่วยจำ<br><span id="recovery-phone-state-2" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+                <div class="bg-gray-50 rounded-xl p-3 border">สีที่ชอบ<br><span id="recovery-color-state-2" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+                <div class="bg-gray-50 rounded-xl p-3 border">สัตว์ที่ชอบ<br><span id="recovery-animal-state-2" class="text-indigo-700 font-black">ยังไม่ตั้งค่า</span></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <button id="btn-export-backup" onclick="exportBackup()" class="bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-sm text-xs active:scale-95">📥 Backup DB</button>
+            <div id="btn-import-backup-wrap" class="relative bg-gray-200 text-gray-700 py-4 rounded-2xl font-black shadow-sm text-xs text-center flex items-center justify-center cursor-pointer active:scale-95">
+                📤 Restore DB
+                <input id="input-import-backup" type="file" accept=".json" class="absolute inset-0 opacity-0 cursor-pointer" onchange="importBackup(event)">
+            </div>
+        </div>
+    </section>
+    <!--** screen-system close -->
+
+    <!--* modal-admin-pin open -->
+    <div class="modal-overlay hidden" id="modal-admin-pin">
+        <div class="modal-content text-center">
+            <h3 class="font-black text-3xl mb-1 text-gray-800">SECURITY PIN</h3>
+            <p class="text-[11px] text-gray-400 mb-6 font-bold uppercase" id="admin-pin-desc">รหัสผ่านเพื่อเข้าระบบ</p>
+            <input type="password" id="admin-pin-input" class="w-full border-2 border-gray-200 p-5 rounded-[24px] text-center text-5xl font-black mb-4 outline-none bg-gray-50 tracking-[12px] focus:border-primary">
+            <div class="flex gap-4 mb-4">
+                <button onclick="closeModal('modal-admin-pin')" class="flex-1 bg-gray-100 py-4 rounded-[20px] font-black text-gray-500 text-lg">ยกเลิก</button>
+                <button onclick="verifyAdminPin()" class="flex-[2] theme-bg py-4 rounded-[20px] font-black shadow-lg text-lg">ยืนยัน</button>
+            </div>
+            <button id="btn-open-recovery" onclick="openRecoveryModal()" class="text-red-500 text-[12px] font-bold underline p-2 active:scale-95">ลืมรหัสผ่าน?</button>
+        </div>
+    </div>
+    <!--** modal-admin-pin close -->
+
+    <!--* modal-recovery open -->
+    <div class="modal-overlay hidden" id="modal-recovery">
+        <div class="modal-content text-center border-t-4 border-red-500">
+            <h3 class="font-black text-2xl mb-1 text-red-600">กู้คืนรหัสผ่าน</h3>
+            <p class="text-[11px] text-gray-500 mb-5 font-bold uppercase">ตอบคำถามให้ครบก่อนรีเซ็ตสิทธิ์</p>
+            <input type="tel" id="rec-ans-phone" placeholder="1. เบอร์โทรศัพท์" class="w-full border-2 p-4 rounded-xl mb-3 text-center font-bold text-gray-700 outline-none focus:border-red-500">
+            <select id="rec-ans-color" class="w-full border-2 p-4 rounded-xl mb-3 text-center font-bold text-gray-700 outline-none focus:border-red-500 bg-white">
+                <option value="" selected disabled>2. เลือกสีที่ชอบ</option>
+                <option value="red">🔴 สีแดง</option>
+                <option value="white">⚪ สีขาว</option>
+                <option value="blue">🔵 สีน้ำเงิน</option>
+                <option value="green">🟢 สีเขียว</option>
+                <option value="yellow">🟡 สีเหลือง</option>
+                <option value="black">⚫ สีดำ</option>
+                <option value="pink">🌸 สีชมพู</option>
+            </select>
+            <select id="rec-ans-animal" class="w-full border-2 p-4 rounded-xl mb-6 text-center font-bold text-gray-700 outline-none focus:border-red-500 bg-white">
+                <option value="" selected disabled>3. เลือกสัตว์ที่อยากเป็น</option>
+                <option value="dog">🐶 หมา</option><option value="cat">🐱 แมว</option><option value="bird">🐦 นก</option><option value="fish">🐟 ปลา</option>
+                <option value="elephant">🐘 ช้าง</option><option value="horse">🐴 ม้า</option><option value="cow">🐄 วัว</option><option value="buffalo">🐃 ควาย</option>
+                <option value="pig">🐷 หมู</option><option value="chicken">🐔 ไก่</option><option value="duck">🦆 เป็ด</option><option value="tiger">🐅 เสือ</option>
+                <option value="lion">🦁 สิงโต</option><option value="bear">🐻 หมี</option><option value="monkey">🐒 ลิง</option><option value="snake">🐍 งู</option>
+                <option value="crocodile">🐊 จระเข้</option><option value="turtle">🐢 เต่า</option><option value="frog">🐸 กบ</option><option value="rabbit">🐰 กระต่าย</option>
+            </select>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modal-recovery'); attemptAdmin('system', document.getElementById('tab-system'))" class="flex-1 bg-gray-100 py-4 rounded-[18px] font-black text-gray-500 text-sm">กลับ</button>
+                <button onclick="executeRecovery()" class="flex-[2] bg-red-600 text-white py-4 rounded-[18px] font-black shadow-lg text-lg">ขุดรหัส ⛏️</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-recovery close -->
+
+    <!--* modal-recovery-setup open -->
+    <div class="modal-overlay hidden" id="modal-recovery-setup">
+        <div class="modal-content">
+            <h3 class="font-black text-xl mb-1 text-indigo-800 text-center">🛡️ ข้อมูลช่วยจำ</h3>
+            <p class="text-[10px] text-indigo-500 font-bold mb-4 text-center">ป้องกันกรณีลืมรหัส PIN (เฉพาะผู้ใช้ PRO)</p>
+            <input type="tel" id="setup-rec-phone" placeholder="1. เบอร์โทรศัพท์" class="w-full border-2 p-4 rounded-xl text-sm font-bold bg-white outline-none mb-3 focus:border-indigo-400">
+            <select id="setup-rec-color" class="w-full border-2 p-4 rounded-xl text-sm font-bold bg-white outline-none mb-3 focus:border-indigo-400 text-gray-600">
+                <option value="" disabled selected>2. เลือกสีที่ชอบ (7 สี)</option>
+                <option value="red">🔴 สีแดง</option><option value="white">⚪ สีขาว</option><option value="blue">🔵 สีน้ำเงิน</option>
+                <option value="green">🟢 สีเขียว</option><option value="yellow">🟡 สีเหลือง</option><option value="black">⚫ สีดำ</option><option value="pink">🌸 สีชมพู</option>
+            </select>
+            <select id="setup-rec-animal" class="w-full border-2 p-4 rounded-xl text-sm font-bold bg-white outline-none mb-5 focus:border-indigo-400 text-gray-600">
+                <option value="" disabled selected>3. เลือกสัตว์ที่อยากเป็น (20 ชนิด)</option>
+                <option value="dog">🐶 หมา</option><option value="cat">🐱 แมว</option><option value="bird">🐦 นก</option><option value="fish">🐟 ปลา</option>
+                <option value="elephant">🐘 ช้าง</option><option value="horse">🐴 ม้า</option><option value="cow">🐄 วัว</option><option value="buffalo">🐃 ควาย</option>
+                <option value="pig">🐷 หมู</option><option value="chicken">🐔 ไก่</option><option value="duck">🦆 เป็ด</option><option value="tiger">🐅 เสือ</option>
+                <option value="lion">🦁 สิงโต</option><option value="bear">🐻 หมี</option><option value="monkey">🐒 ลิง</option><option value="snake">🐍 งู</option>
+                <option value="crocodile">🐊 จระเข้</option><option value="turtle">🐢 เต่า</option><option value="frog">🐸 กบ</option><option value="rabbit">🐰 กระต่าย</option>
+            </select>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modal-recovery-setup')" class="flex-1 bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm active:scale-95">ยกเลิก</button>
+                <button onclick="saveRecoveryData()" class="flex-[2] bg-indigo-600 text-white py-3.5 rounded-xl font-black text-sm active:scale-95 shadow-md">💾 บันทึกข้อมูลช่วยจำ</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-recovery-setup close -->
+
+    <!--* modal-menu-form open -->
+    <div class="modal-overlay hidden" id="modal-menu-form">
+        <div class="modal-content">
+            <h3 class="font-black text-2xl mb-5 border-b pb-4 text-gray-800">เพิ่มรายการเมนู</h3>
+            <input type="hidden" id="form-menu-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">ชื่อ</label>
+                    <input id="form-menu-name" type="text" class="w-full border-2 p-3.5 rounded-2xl outline-none font-bold text-base bg-gray-50 focus:border-primary">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">ราคา</label>
+                    <input id="form-menu-price" type="number" class="w-full border-2 p-3.5 rounded-2xl outline-none font-bold text-base bg-gray-50 focus:border-primary">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">รายการเสริม (Add-ons)</label>
+                        <button onclick="addAddonField()" class="bg-white border text-blue-600 text-[10px] font-black px-2 py-1 rounded">+ เพิ่ม</button>
+                    </div>
+                    <div id="addon-fields-container" class="space-y-2"></div>
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">รูปภาพ</label>
+                    <input type="file" accept="image/*" class="w-full text-xs font-bold p-2 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300" onchange="handleImage(event, 'temp')">
+                    <img id="form-menu-preview" class="w-20 h-20 object-cover rounded-2xl mt-3 hidden border-2 shadow-sm">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button onclick="closeModal('modal-menu-form')" class="flex-1 bg-gray-100 py-3.5 rounded-[18px] font-bold text-gray-500">ยกเลิก</button>
+                <button onclick="saveMenuItem()" class="flex-[2] theme-bg py-3.5 rounded-[18px] font-black shadow-lg text-lg">บันทึก</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-menu-form close -->
+
+    <!--* modal-addon-select open -->
+    <div class="modal-overlay hidden" id="modal-addon-select">
+        <div class="modal-content">
+            <h3 class="font-black text-2xl mb-2 text-gray-800" id="addon-modal-name">ชื่อเมนู</h3>
+            <p class="theme-text font-black text-lg mb-4 border-b pb-4">฿<span id="addon-modal-price">0</span></p>
+            <div id="addon-options-list" class="space-y-3 mb-4 max-h-48 overflow-y-auto"></div>
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl mb-6 border">
+                <span class="text-xs font-bold text-gray-600">จำนวนที่สั่ง:</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="adjustAddonQty(-1)" class="w-8 h-8 rounded-lg bg-white border font-bold text-lg">-</button>
+                    <span id="addon-qty-display" class="font-black text-xl">1</span>
+                    <button onclick="adjustAddonQty(1)" class="w-8 h-8 rounded-lg bg-white border font-bold text-lg">+</button>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeModal('modal-addon-select')" class="flex-1 bg-gray-100 py-4 rounded-[20px] font-bold text-gray-500">ยกเลิก</button>
+                <button onclick="confirmAddonSelection()" class="flex-[2] theme-bg py-4 rounded-[20px] font-black shadow-lg text-lg">ใส่ตะกร้า 🛒</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-addon-select close -->
+
+    <!--* modal-pro-unlock open -->
+    <div class="modal-overlay hidden" id="modal-pro-unlock">
+        <div class="modal-content text-center">
+            <h3 class="font-black text-3xl mb-1 text-orange-600 tracking-tighter">👑 UNLOCK PRO</h3>
+            <p class="text-[11px] text-gray-500 mb-6 font-bold uppercase tracking-widest">ปลดล็อคฟีเจอร์สำคัญและจัดการร้านแบบเต็มระบบ</p>
+            <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-left mb-6 shadow-sm">
+                <ul class="space-y-3 text-[12px] font-bold text-yellow-900 leading-tight">
+                    <li class="flex items-start gap-2"><span>✅</span><span>ปลดล็อค โต๊ะ/คิว และเมนู มากกว่า 4 รายการ</span></li>
+                    <li class="flex items-start gap-2"><span>✅</span><span>ดูรายได้/ประวัติย้อนหลัง และยอดฮิตแบบละเอียด</span></li>
+                    <li class="flex items-start gap-2"><span>✅</span><span>ใช้งานลืมรหัส Admin, Backup/Restore, และ Sync ขั้นสูง</span></li>
+                </ul>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 mb-4 text-left">
+                <p class="text-[10px] text-emerald-700 font-black uppercase tracking-widest mb-1">ราคาโปร</p>
+                <p class="text-2xl font-black text-emerald-800 tracking-tight">XXX-</p>
+                <p class="text-[11px] text-emerald-700/80 font-bold mt-1">* ใส่ราคาเองได้จากโค้ดบรรทัดนี้</p>
+            </div>
+            <a href="https://line.me/" target="_blank" rel="noopener noreferrer" class="block w-full mb-4 bg-[#06C755] text-white py-3.5 rounded-2xl font-black text-sm shadow-md active:scale-95">ติดต่อทาง LINE เพื่อซื้อแพ็กเกจ</a>
+            <div class="text-center p-4 bg-gray-50 rounded-2xl mb-6 border">
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">ID ปลดล็อค</p>
+                <span id="display-hwid" class="font-mono text-xl text-gray-800 font-black tracking-widest select-all">XXX</span>
+            </div>
+            <input type="text" id="pro-key-input" class="w-full border-2 p-5 rounded-2xl outline-none font-mono text-center text-xl bg-white uppercase tracking-widest focus:border-gray-400 mb-6" placeholder="รหัสปลดล็อค">
+            <div class="flex flex-col gap-3">
+                <button onclick="validateProKey()" class="w-full theme-bg py-5 rounded-[22px] font-black shadow-lg text-lg active:scale-95">ปลดล็อคทันที 🚀</button>
+                <button onclick="closeModal('modal-pro-unlock')" class="mt-3 text-[11px] text-gray-400 font-bold uppercase underline p-2">ปิดไปก่อน</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-pro-unlock close -->
+
+    <!--* modal-review open -->
+    <div class="modal-overlay hidden" id="modal-review">
+        <div class="modal-content bg-gray-50 p-5">
+            <div class="bg-white p-5 rounded-[24px] shadow-sm border mb-4 text-center">
+                <h2 class="font-black text-xl mb-1">📝 ตรวจสอบออเดอร์</h2>
+                <p class="text-sm text-gray-500 font-bold"><span class="lbl-unit">โต๊ะ</span> <span id="review-unit-id" class="font-black text-black text-2xl"></span></p>
+                <div id="review-list" class="mt-4 text-sm text-left divide-y border-t border-b py-3 max-h-48 overflow-y-auto font-bold text-gray-700"></div>
+                <div class="mt-3 text-right">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">ยอดรวมบิลนี้</span><br>
+                    <span class="font-black text-3xl theme-text tracking-tighter">฿<span id="review-total-price">0</span></span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modal-review')" class="flex-1 bg-gray-200 py-3.5 rounded-2xl font-black text-gray-600 text-base active:scale-95">แก้ไข</button>
+                <button onclick="confirmOrderSend()" class="flex-[2] theme-bg py-3.5 rounded-2xl font-black shadow-lg text-lg active:scale-95">ส่งออร์เดอร์ 🚀</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-review close -->
+
+    <!--* modal-checkout open -->
+    <div class="modal-overlay hidden" id="modal-checkout">
+        <div class="modal-content p-0 overflow-hidden bg-gray-100 max-w-[400px]">
+            <div class="bg-white p-6 text-center shadow-sm relative z-10">
+                <h2 class="font-black text-2xl mb-1 text-gray-800">เช็คบิล</h2>
+                <p class="theme-text font-black text-4xl mb-1"><span class="lbl-unit text-xl">โต๊ะ</span> <span id="checkout-unit-id"></span></p>
+                <p id="checkout-live-time" class="text-[11px] text-gray-400 font-bold mb-3">เวลาใช้งาน: -</p>
+                <div id="checkout-item-list" class="mt-2 text-xs text-left divide-y border-t border-b py-4 max-h-48 overflow-y-auto font-bold text-gray-700"></div>
+                <div class="mt-4 flex justify-between items-center text-black">
+                    <span class="text-[12px] text-gray-400 font-bold uppercase">ยอดสุทธิ</span>
+                    <span class="font-black text-4xl tracking-tighter">฿<span id="checkout-total">0</span></span>
+                </div>
+            </div>
+            <div id="checkout-qr-area" class="text-center bg-white p-5 border-t border-dashed border-gray-200">
+                <p class="font-black text-blue-600 text-[10px] uppercase mb-3">สแกนจ่าย PROMPTPAY</p>
+                <div id="qr-container" class="mx-auto w-[160px] h-[160px] bg-gray-50 rounded-[24px] border-4 border-gray-100 flex items-center justify-center overflow-hidden shadow-inner relative">
+                    <img id="qr-offline-img" class="w-full h-full object-cover hidden">
+                    <div id="qr-gen-area"></div>
+                </div>
+                <p id="qr-status-text" class="text-[9px] text-gray-400 mt-2"></p>
+            </div>
+            <div class="p-5 bg-white border-t relative z-10">
+                <div id="checkout-payment-buttons" class="flex gap-2 mb-2">
+                    <button onclick="confirmPayment('cash')" class="flex-1 bg-emerald-500 text-white py-4 rounded-[20px] font-black shadow-lg text-sm active:scale-95">💵 เงินสด</button>
+                    <button onclick="confirmPayment('transfer')" class="flex-1 bg-blue-500 text-white py-4 rounded-[20px] font-black shadow-lg text-sm active:scale-95">📱 โอน/QR</button>
+                </div>
+                <button onclick="closeModal('modal-checkout')" class="w-full bg-gray-100 text-gray-500 py-3.5 rounded-[20px] font-black text-sm active:scale-95 uppercase">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-checkout close -->
+
+    <!--* modal-client-entry open -->
+    <div class="modal-overlay hidden" id="modal-client-entry">
+        <div class="modal-content">
+            <div class="text-center mb-5">
+                <h3 class="font-black text-2xl text-gray-800">การเชื่อมต่ออุปกรณ์</h3>
+                <p class="text-[11px] text-gray-500 font-bold mt-1">สำหรับเข้าโหมดเครื่องลูกด้วย PIN หรือ QR</p>
+            </div>
+
+            <div class="bg-gray-50 border rounded-[24px] p-4 mb-4">
+                <div class="text-center mb-3">
+                    <div class="text-[10px] uppercase font-black text-blue-500 mb-1">กรอก PIN เครื่องใหม่</div>
+                    <input id="manual-pin" type="text" inputmode="numeric" placeholder="กรอก PIN 6 หลัก" class="w-full border-2 p-4 rounded-2xl text-center text-3xl font-mono font-black tracking-[8px] bg-white outline-none focus:border-primary uppercase">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="submitClientAccess()" class="bg-blue-600 text-white py-4 rounded-[18px] font-black shadow-lg text-sm active:scale-95">เชื่อมต่อด้วย PIN</button>
+                    <button onclick="openClientScanner()" class="bg-white text-gray-700 border py-4 rounded-[18px] font-black text-sm active:scale-95">สแกน QR Code</button>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-100 rounded-[20px] p-3 text-[11px] text-amber-700 font-bold leading-relaxed">
+                หลังกรอกหรือสแกนแล้ว เครื่องแม่ต้องกดยอมรับก่อน เครื่องลูกจึงจะเข้าโหมดใช้งานได้
+            </div>
+
+            <button onclick="closeModal('modal-client-entry')" class="w-full bg-gray-100 py-3.5 mt-4 rounded-xl font-black text-gray-500 text-sm active:scale-95">ปิดหน้าต่าง</button>
+        </div>
+    </div>
+    <!--** modal-client-entry close -->
+
+    <!--* modal-client-scanner open -->
+    <div class="modal-overlay hidden" id="modal-client-scanner">
+        <div class="modal-content">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div>
+                    <h3 class="font-black text-xl text-gray-800">สแกน QR เครื่องแม่</h3>
+                    <p class="text-[11px] text-gray-500 font-bold">เมื่อสแกนสำเร็จ PIN จะถูกกรอกอัตโนมัติ</p>
+                </div>
+                <button onclick="closeClientScanner()" class="w-10 h-10 rounded-xl bg-gray-100 text-gray-500 font-black text-lg">✕</button>
+            </div>
+            <div id="qr-reader-index" class="w-full min-h-[260px] rounded-[24px] overflow-hidden bg-black/5 border"></div>
+            <button onclick="closeClientScanner()" class="w-full bg-gray-100 py-3.5 mt-4 rounded-xl font-black text-gray-500 text-sm active:scale-95">ปิดกล้อง</button>
+        </div>
+    </div>
+    <!--** modal-client-scanner close -->
+
+    <!--* modal-sync-key-confirm open -->
+    <div class="modal-overlay hidden" id="modal-sync-key-confirm">
+        <div class="modal-content text-center border-t-4 border-blue-500 max-w-[420px] w-[92vw] sm:w-full">
+            <h3 class="font-black text-2xl mb-1 text-slate-800">ยืนยันสร้าง PIN ใหม่</h3>
+            <p class="text-[12px] text-gray-500 mb-5 font-bold leading-relaxed">เครื่องลูกที่เคยเชื่อมต่อจะต้องขออนุมัติใหม่ทั้งหมด</p>
+            <div class="flex gap-3 w-full">
+                <button onclick="closeModal('modal-sync-key-confirm')" class="flex-1 bg-gray-100 py-3.5 rounded-[16px] font-black text-gray-500 text-sm">ยกเลิก</button>
+                <button onclick="confirmNewSyncKey()" class="flex-1 bg-slate-900 text-white py-3.5 rounded-[16px] font-black shadow-lg text-sm">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+    <!--** modal-sync-key-confirm close -->
+
+    <!--* modal-client-approvals open -->
+    <div class="modal-overlay hidden" id="modal-client-approvals">
+        <div class="modal-content max-w-[460px] w-[92vw] sm:w-full">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-black text-lg text-gray-800">🔔 คำขออนุมัติเครื่องลูก</h3>
+                <button onclick="closeModal('modal-client-approvals')" class="w-9 h-9 rounded-full bg-gray-100 text-gray-500 font-black text-lg">×</button>
+            </div>
+            <div id="client-approval-modal-count" class="text-xs text-gray-500 font-bold mb-3">0 รายการ</div>
+            <div id="client-approval-modal-list" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+    <!--** modal-client-approvals close -->
+
+    <!--* modal-client-request-popup open -->
+    <div class="modal-overlay hidden master-approval-overlay" id="modal-client-request-popup" data-hook="master-approval-modal">
+        <div class="master-approval-backdrop" data-hook="master-approval-backdrop"></div>
+        <div class="modal-content master-approval-modal max-w-[380px] w-[92vw] sm:w-full text-center border-t-4 border-emerald-500">
+            <div class="text-[11px] font-black text-emerald-600 uppercase mb-2">คำขอเชื่อมต่อใหม่จากเครื่องลูก</div>
+            <h3 class="font-black text-xl text-gray-800 mb-1">อนุญาตการ Sync หรือไม่?</h3>
+            <p id="client-request-popup-total" class="text-[11px] text-gray-400 font-bold mb-4">คำขอเดียวในคิว</p>
+
+            <div class="bg-gray-50 border rounded-2xl p-4 flex items-center gap-3 text-left mb-4">
+                <div id="client-request-popup-avatar" class="w-14 h-14 rounded-full overflow-hidden bg-white border flex items-center justify-center shrink-0"></div>
+                <div class="min-w-0">
+                    <div id="client-request-popup-name" class="font-black text-gray-800 truncate">เครื่องลูก</div>
+                    <div id="client-request-popup-meta" class="text-[10px] text-gray-400 font-bold">PIN -</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-master-reject-client" data-hook="master-reject-client" onclick="rejectNextClientRequest()" class="bg-red-50 border border-red-100 text-red-600 py-3.5 rounded-xl font-black text-sm">ปฏิเสธ</button>
+                <button id="btn-master-approve-client" data-hook="master-approve-client" onclick="approveNextClientRequest()" class="bg-emerald-500 text-white py-3.5 rounded-xl font-black text-sm shadow-md">ยอมรับ</button>
+            </div>
+
+            <button onclick="closeModal('modal-client-request-popup')" class="w-full bg-gray-100 py-3 mt-3 rounded-xl font-black text-gray-500 text-sm">ปิด</button>
+        </div>
+    </div>
+    <!--** modal-client-request-popup close -->
+
+    <div id="toast"></div>
+
+    <script>
+        // helper functions for modal wiring in case core.js ยังไม่โหลดหรือยังไม่ประกาศ
+        window.openModal = window.openModal || function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+            el.style.display = 'flex';
+        };
+
+        window.closeModal = window.closeModal || function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+            el.style.display = 'none';
+        };
+
+        window.openClientEntryModal = function() {
+            openModal('modal-client-entry');
+        };
+
+        window.submitClientAccess = function() {
+            if (typeof submitClientAccessRequest === 'function') {
+                submitClientAccessRequest();
+                return;
+            }
+            console.error('[FAKDU][SYNC] submitClientAccessRequest() is missing. Abort connect flow.');
+            if (typeof showToast === 'function') showToast('ระบบเชื่อมต่อยังไม่พร้อม กรุณารีเฟรชหน้าแล้วลองใหม่', 'error');
+            else alert('ระบบเชื่อมต่อยังไม่พร้อม กรุณารีเฟรชหน้าแล้วลองใหม่');
+        };
+
+        window.openProModal = window.openProModal || function() {
+            openModal('modal-pro-unlock');
+        };
+
+        window.openRecoveryModal = window.openRecoveryModal || function() {
+            closeModal('modal-admin-pin');
+            openModal('modal-recovery');
+        };
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+            });
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="js/db.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/vault.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/client-core.js"></script>
+</div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const mapIds = [
+          ['recovery-phone-state','recovery-phone-state-2'],
+          ['recovery-color-state','recovery-color-state-2'],
+          ['recovery-animal-state','recovery-animal-state-2']
+        ];
+        const syncMirror = () => {
+          mapIds.forEach(([a,b]) => {
+            const src = document.getElementById(a);
+            const dst = document.getElementById(b);
+            if (src && dst) dst.textContent = src.textContent || 'ยังไม่ตั้งค่า';
+          });
+        };
+        syncMirror();
+        const obs = new MutationObserver(syncMirror);
+        mapIds.forEach(([a]) => {
+          const src = document.getElementById(a);
+          if (src) obs.observe(src, { childList: true, subtree: true, characterData: true });
+        });
+      });
+    </script>
+</body>
+</html>

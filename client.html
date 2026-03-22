@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e3a8a"> <title>FAKDU v9.42 - Client Node</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-blue-50"> <div class="app-container">
+
+    <div class="glass-header relative flex justify-between items-center w-full bg-blue-900">
+        <div class="flex items-start gap-3 w-[60%] z-10">
+            <div class="relative w-[45px] h-[45px] flex-shrink-0 mt-1">
+                <div id="online-status-dot" class="absolute -top-1 -left-1 w-3 h-3 rounded-full border-2 border-white bg-green-500 shadow-sm z-20" title="Online"></div>
+                <img id="client-avatar" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+PHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjYmJiYmJiIi8+PC9zdmc+" class="w-full h-full object-cover rounded-full border-2 border-white shadow-sm bg-white">
+            </div>
+            <div class="flex flex-col mt-1">
+                <h1 id="display-shop-name" class="font-black text-lg leading-none text-white drop-shadow-md truncate max-w-[150px]">FAKDU</h1>
+                <span id="client-device-name" class="text-[10px] font-bold text-blue-200">เครื่องลูก (กำลังซิงค์...)</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-end w-[40%] gap-3 relative h-full pt-1 z-10 pr-2">
+            <div class="flex flex-col items-end">
+                <span class="text-[12px] font-black text-white tracking-wider">CLIENT</span>
+                <span class="text-[9px] font-bold text-white/70 tracking-wider">v9.42</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-nav">
+        <div id="tab-customer" class="nav-tab active" onclick="switchTab('customer', this)">👨‍👩‍👦 โต๊ะ/คิว</div>
+        <div id="tab-shop" class="nav-tab" onclick="switchTab('shop', this)">🧾 เช็คบิล</div>
+        <div id="tab-settings" class="nav-tab" onclick="switchTab('settings', this)">⚙️ ตั้งค่าลูก</div>
+    </div>
+    <div id="screen-customer" class="screen active p-5 pt-4">
+        <div class="flex justify-between items-center mb-3">
+            <span class="text-[11px] font-bold text-gray-400 uppercase">เลือกโต๊ะที่ต้องการสั่ง</span>
+        </div>
+        <div id="grid-units" class="grid grid-cols-2 gap-4"></div>
+    </div>
+
+    <div id="screen-order" class="screen hidden bg-gray-50 p-4">
+        <div class="flex items-center gap-4 mb-4 sticky top-0 bg-gray-50/90 backdrop-blur py-2 z-10 border-b">
+            <button onclick="switchTab('customer')" class="bg-white px-4 py-2.5 rounded-xl shadow-sm font-black text-sm text-gray-600 border active:scale-95 transition-transform">← กลับ</button>
+            <h2 class="font-black text-xl theme-text"><span class="lbl-unit">โต๊ะ</span> <span id="active-unit-id"></span></h2>
+        </div>
+        <div id="ordered-items-bar" class="hidden mb-4 bg-blue-50 border border-blue-100 p-3 rounded-xl">
+            <div class="text-[10px] text-blue-600 font-bold uppercase mb-1">สั่งไปแล้ว</div>
+            <div id="ordered-items-list" class="text-xs font-bold text-gray-700 space-y-1"></div>
+        </div>
+        <div id="item-list" class="space-y-3 mb-28"></div>
+        <div class="fixed bottom-0 left-0 w-full max-w-[480px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-20 mx-auto right-0 rounded-t-[28px] p-4 pb-6 border-t border-gray-100" style="padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+            <div class="flex justify-between items-center px-2">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">ตะกร้า <span id="cart-count" class="text-blue-600 font-black text-base">0</span></span><br>
+                    <span class="font-black text-3xl text-blue-800 tracking-tighter">฿<span id="cart-total">0</span></span>
+                </div>
+                <button onclick="reviewCart()" class="bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-black text-base shadow-lg active:scale-95 transition-transform">ส่งออร์เดอร์ 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen hidden p-5 pt-8">
+        <div id="shop-queue" class="space-y-4"></div>
+    </div>
+
+    <div id="screen-settings" class="screen hidden p-5">
+        <h2 class="font-black text-2xl text-gray-800 mb-6">ตั้งค่าเครื่องลูก</h2>
+        
+        <div class="bg-white p-6 rounded-[28px] border shadow-sm mb-6">
+            <label class="text-[12px] text-gray-400 font-bold uppercase tracking-widest mb-4 block">โปรไฟล์พนักงาน / เครื่องนี้</label>
+            <div class="flex items-center gap-5 mb-6">
+                <div class="relative w-[80px] h-[80px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center overflow-hidden shrink-0 cursor-pointer" onclick="document.getElementById('upload-client-avatar').click()">
+                    <span class="text-[10px] font-bold text-gray-400 text-center">เปลี่ยน<br>รูป</span>
+                    <input type="file" id="upload-client-avatar" accept="image/*" class="hidden" onchange="handleClientImage(event)">
+                </div>
+                <div class="flex-1 space-y-3">
+                    <input id="sys-client-name" type="text" placeholder="ชื่อพนักงาน / ชื่อเครื่อง" class="w-full border-2 p-3 rounded-xl font-bold text-sm bg-gray-50 outline-none focus:border-blue-500">
+                    <button onclick="saveClientSettings()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-black text-sm shadow-md active:scale-95">💾 บันทึกชื่อ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-red-100 pt-6 mt-8">
+            <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest mb-3 text-center">โซนอันตราย</p>
+            <button onclick="clientLogout()" class="w-full bg-red-50 text-red-600 border border-red-200 py-4 rounded-[22px] font-black text-base active:scale-95 transition-transform flex justify-center items-center gap-2">
+                🚪 ออกจากระบบ (ล้างข้อมูลเครื่องลูก)
+            </button>
+            <p class="text-[10px] text-gray-400 text-center mt-3">ระบบจะส่งออร์เดอร์ล่าสุดที่ค้างอยู่ให้เสร็จก่อน แล้วจะทำการลบแคชทั้งหมด เครื่องจะกลับไปหน้าเชื่อมต่อใหม่</p>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modal-addon-select">
+        <div class="modal-content">
+            <h3 class="font-black text-2xl mb-2 text-gray-800" id="addon-modal-name">ชื่อเมนู</h3>
+            <p class="text-blue-600 font-black text-lg mb-4 border-b pb-4">฿<span id="addon-modal-price">0</span></p>
+            <div id="addon-options-list" class="space-y-3 mb-4 max-h-48 overflow-y-auto"></div>
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl mb-6 border">
+                <span class="text-xs font-bold text-gray-600">จำนวนที่สั่ง:</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="adjustAddonQty(-1)" class="w-8 h-8 rounded-lg bg-white border font-bold text-lg">-</button>
+                    <span id="addon-qty-display" class="font-black text-xl">1</span>
+                    <button onclick="adjustAddonQty(1)" class="w-8 h-8 rounded-lg bg-white border font-bold text-lg">+</button>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeModal('modal-addon-select')" class="flex-1 bg-gray-100 py-4 rounded-[20px] font-bold text-gray-500">ยกเลิก</button>
+                <button onclick="confirmAddonSelection()" class="flex-[2] bg-blue-600 text-white py-4 rounded-[20px] font-black shadow-lg text-lg">ใส่ตะกร้า 🛒</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-review">
+        <div class="modal-content bg-gray-50 p-5">
+            <div class="bg-white p-5 rounded-[24px] shadow-sm border mb-4 text-center">
+                <h2 class="font-black text-xl mb-1">📝 ตรวจสอบออเดอร์</h2>
+                <p class="text-sm text-gray-500 font-bold"><span class="lbl-unit">โต๊ะ</span> <span id="review-unit-id" class="font-black text-black text-2xl"></span></p>
+                <div id="review-list" class="mt-4 text-sm text-left divide-y border-t border-b py-3 max-h-48 overflow-y-auto font-bold text-gray-700"></div>
+                <div class="mt-3 text-right">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">ยอดรวมบิลนี้</span><br>
+                    <span class="font-black text-3xl text-blue-800 tracking-tighter">฿<span id="review-total-price">0</span></span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modal-review')" class="flex-1 bg-gray-200 py-3.5 rounded-2xl font-black text-gray-600 text-base active:scale-95">แก้ไข</button>
+                <button onclick="confirmOrderSend()" class="flex-[2] bg-blue-600 text-white py-3.5 rounded-2xl font-black shadow-lg text-lg active:scale-95">ส่งออร์เดอร์ 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-checkout">
+        <div class="modal-content p-0 overflow-hidden bg-gray-100 max-w-[400px]">
+            <div class="bg-white p-6 text-center shadow-sm relative z-10">
+                <h2 class="font-black text-2xl mb-1 text-gray-800">เช็คบิล</h2>
+                <p class="text-blue-600 font-black text-4xl mb-3"><span class="lbl-unit text-xl">โต๊ะ</span> <span id="checkout-unit-id"></span></p>
+                <div id="checkout-item-list" class="mt-2 text-xs text-left divide-y border-t border-b py-4 max-h-48 overflow-y-auto font-bold text-gray-700"></div>
+                <div class="mt-4 flex justify-between items-center text-black">
+                    <span class="text-[12px] text-gray-400 font-bold uppercase">ยอดสุทธิ</span>
+                    <span class="font-black text-4xl tracking-tighter">฿<span id="checkout-total">0</span></span>
+                </div>
+            </div>
+            <div id="checkout-qr-area" class="text-center bg-white p-5 border-t border-dashed border-gray-200">
+                <p class="font-black text-blue-600 text-[10px] uppercase mb-3">สแกนจ่าย PROMPTPAY</p>
+                <div id="qr-container" class="mx-auto w-[160px] h-[160px] bg-gray-50 rounded-[24px] border-4 border-gray-100 flex items-center justify-center overflow-hidden shadow-inner relative"><img id="qr-offline-img" class="w-full h-full object-cover hidden"><div id="qr-gen-area"></div></div>
+                <p id="qr-status-text" class="text-[9px] text-gray-400 mt-2">QR ดึงจากเครื่องแม่</p>
+            </div>
+            <div class="p-5 bg-white border-t relative z-10">
+                <div id="checkout-payment-buttons" class="flex gap-2 mb-2">
+                    <button onclick="confirmPayment('cash')" class="flex-1 bg-emerald-500 text-white py-4 rounded-[20px] font-black shadow-lg text-sm active:scale-95">💵 เงินสด</button>
+                    <button onclick="confirmPayment('transfer')" class="flex-1 bg-blue-500 text-white py-4 rounded-[20px] font-black shadow-lg text-sm active:scale-95">📱 โอน/QR</button>
+                </div>
+                <button onclick="closeModal('modal-checkout')" class="w-full bg-gray-100 text-gray-500 py-3.5 rounded-[20px] font-black text-sm active:scale-95 uppercase">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-custom-dialog">
+        <div class="modal-content text-center">
+            <h3 class="font-black text-xl mb-2 text-gray-800" id="custom-dialog-title">แจ้งเตือน</h3>
+            <p class="text-sm text-gray-500 mb-4 font-bold" id="custom-dialog-msg">ข้อความ</p>
+            <input type="text" id="custom-dialog-input" class="hidden w-full border-2 p-3 rounded-xl mb-4 text-center font-bold outline-none focus:border-blue-500">
+            <div class="flex gap-3">
+                <button id="custom-dialog-cancel" class="hidden flex-1 bg-gray-100 py-3 rounded-[16px] font-black text-gray-500">ยกเลิก</button>
+                <button id="custom-dialog-confirm" class="flex-[2] bg-blue-600 py-3 rounded-[16px] font-black shadow-lg text-white">ตกลง</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast"></div>
+
+<script src="js/vault.js"></script>
+<script src="js/core.js"></script>
+<script src="js/client-core.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        });
+    }
+</script>
+</div>
+</body>
+</html>

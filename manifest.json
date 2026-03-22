@@ -1,0 +1,64 @@
+{
+  "name": "FAKDU",
+  "short_name": "FAKDU",
+  "description": "FAKDU POS ระบบขายหน้าร้านแบบ Offline/Online สำหรับเครื่องแม่และเครื่องลูก",
+  "lang": "th",
+  "dir": "ltr",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#800000",
+  "categories": ["business", "productivity", "food", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "หน้าเครื่องแม่",
+      "short_name": "Master",
+      "description": "เปิดระบบหลักของร้าน",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "./icon.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "หน้าเครื่องลูก",
+      "short_name": "Client",
+      "description": "เปิดโหมดเครื่องลูก",
+      "url": "./client.html",
+      "icons": [
+        {
+          "src": "./icon.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
