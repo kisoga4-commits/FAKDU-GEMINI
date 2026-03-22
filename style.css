@@ -614,12 +614,13 @@ hr {
 #modal-review,
 #modal-checkout,
 #modal-client-entry,
-#modal-client-scanner {
+#modal-client-scanner,
+#modal-custom-dialog {
   position: fixed;
   inset: 0;
   z-index: 120;
   display: none;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   padding: 18px 14px;
   background: rgba(2, 6, 23, 0.48);
@@ -636,6 +637,7 @@ hr {
 #modal-checkout.open,
 #modal-client-entry.open,
 #modal-client-scanner.open,
+#modal-custom-dialog.open,
 .modal.open {
   display: flex;
 }
@@ -650,6 +652,7 @@ hr {
 #modal-checkout > *,
 #modal-client-entry > *,
 #modal-client-scanner > *,
+#modal-custom-dialog > *,
 .modal-sheet,
 .modal-card {
   width: 100%;
